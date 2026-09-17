@@ -1,16 +1,21 @@
 const screen = document.getElementById('screen');
 const N = 35;
 const elems = [];
-const pointer = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+// Boshlang'ich koordinatalar ekran markaziga o'rnatiladi
+let pointer = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
 let width = window.innerWidth;
 let height = window.innerHeight;
 let rad = 200;
 let frm = 0;
 
-// Oldingi elementlarni tozalash (agar bo'lsa)
-screen.innerHTML = '';
+// Oldingi elementlarni tozalash
+if (screen) {
+  screen.innerHTML = '';
+}
 
+// Ajdaho bo'g'inlarini yaratish
 for (let i = 0; i < N; i++) {
   const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
   
@@ -25,17 +30,19 @@ for (let i = 0; i < N; i++) {
   screen.appendChild(use);
   elems.push({
     use: use,
-    x: width / 2,
-    y: height / 2
+    x: pointer.x,
+    y: pointer.y
   });
 }
 
+// Barmog'ingiz yoki kursor harakatini tutib olish
 const updatePointer = (x, y) => {
   pointer.x = x;
   pointer.y = y;
 };
 
 window.addEventListener('pointermove', (e) => updatePointer(e.clientX, e.clientY));
+window.addEventListener('mousemove', (e) => updatePointer(e.clientX, e.clientY));
 window.addEventListener('touchmove', (e) => {
   if (e.touches.length > 0) {
     updatePointer(e.touches[0].clientX, e.touches[0].clientY);
@@ -47,12 +54,14 @@ window.addEventListener('resize', () => {
   height = window.innerHeight;
 });
 
+// Animatsiya sikli
 const run = () => {
   requestAnimationFrame(run);
   frm += 0.01;
 
   let e = elems[0];
 
+  // Avtopilot tebranishi
   const ax = (Math.cos(3 * frm) * rad) / width;
   const ay = (Math.sin(4 * frm) * rad) / height;
 
@@ -69,14 +78,13 @@ const run = () => {
     );
   }
 
-  // Tana va dum qismlarini tartib bilan ulash
+  // Tana va dum qismlarini ulash
   for (let i = 1; i < N; i++) {
     let e = elems[i];
     let ep = elems[i - 1];
 
     const a = Math.atan2(ep.y - e.y, ep.x - e.x);
 
-    // Bo'g'inlar orasidagi elastik masofa va siljish
     e.x = ep.x - Math.cos(a) * 12;
     e.y = ep.y - Math.sin(a) * 12;
 
